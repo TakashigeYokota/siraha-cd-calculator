@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INUWASI「SIRAHA」特典会 CD購入シミュレーター</title>
+<style>
+  :root { --red:#d40000; --dark:#171717; --gray:#f3f3f3; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif; background:#f5f5f5; color:#222; }
+  .wrap { max-width:1050px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { margin:0 0 6px; font-size:28px; }
+  .sub { color:#666; margin-bottom:20px; }
+  .notice { background:#fff3f3; border-left:5px solid var(--red); padding:14px 16px; margin-bottom:18px; line-height:1.65; }
+  .card { background:white; border-radius:12px; padding:20px; margin:16px 0; box-shadow:0 2px 10px rgba(0,0,0,.06); }
+  h2 { font-size:20px; margin:0 0 14px; border-bottom:2px solid #eee; padding-bottom:8px; }
+  .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+  .item { border:1px solid #ddd; border-radius:9px; padding:13px; }
+  .item strong { display:block; margin-bottom:5px; }
+  .desc { color:#666; font-size:13px; line-height:1.45; min-height:38px; }
+  .row { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px; }
+  input[type=number] { width:90px; padding:9px; font-size:16px; border:1px solid #bbb; border-radius:7px; text-align:right; }
+  button { border:0; border-radius:8px; padding:12px 18px; font-weight:700; cursor:pointer; }
+  .calc { background:var(--red); color:white; font-size:17px; width:100%; margin-top:18px; }
+  .reset { background:#eee; color:#333; margin-top:10px; width:100%; }
+  .result { display:none; }
+  .big { font-size:30px; font-weight:800; }
+  .price { font-size:20px; font-weight:700; }
+  .summary { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+  .metric { background:#fafafa; border-radius:8px; padding:14px; text-align:center; border:1px solid #eee; }
+  .metric .num { font-size:26px; font-weight:800; margin-top:4px; }
+  table { width:100%; border-collapse:collapse; }
+  th,td { padding:10px 8px; border-bottom:1px solid #eee; text-align:left; }
+  th { background:#fafafa; }
+  .warn { color:#a40000; font-weight:700; }
+  .small { font-size:12px; color:#666; line-height:1.6; }
+  @media (max-width:700px) {
+    .grid,.summary { grid-template-columns:1fr; }
+    h1 { font-size:23px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>INUWASI「SIRAHA」特典会 CD購入シミュレーター</h1>
+  <div class="sub">欲しい特典の枚数を入力すると、条件を満たすCD購入組み合わせを自動計算します。</div>
+
+  <div class="notice">
+    <b>計算ルール</b><br>
+    ・CD 1枚購入につき特典券1枚。<br>
+    ・初回限定盤：4,400円 ／ 通常盤：2,200円。<br>
+    ・1会計で10,000円購入するごとに、特典券を2枚追加。<br>
+    ・追加特典券は「10,000円単位」で計算し、すべて同一会計で購入する前提です。<br>
+    ・「特典券2枚：初回盤アートピース」は、希望数と同数の初回限定盤を確保する前提で計算します。
+  </div>
+
+  <div class="card">
+    <h2>欲しい特典の数量を入力</h2>
+    <div class="grid">
+      <div class="item">
+        <strong>特典券1枚：1枚特典</strong>
+        <div class="desc">2ショット/ソロチェキ、アザージャケット、ランダムチェキ等から1つ</div>
+        <div class="row"><span>希望数</span><input id="q1" type="number" min="0" value="0"></div>
+      </div>
+      <div class="item">
+        <strong>特典券2枚：初回盤アートピース</strong>
+        <div class="desc">サイン・コメント記入</div>
+        <div class="row"><span>希望数</span><input id="q2" type="number" min="0" value="0"></div>
+      </div>
+      <div class="item">
+        <strong>特典券3枚：メンバーソロムービー15秒</strong>
+        <div class="desc">スマホ/携帯電話のみ</div>
+        <div class="row"><span>希望数</span><input id="q3" type="number" min="0" value="0"></div>
+      </div>
+      <div class="item">
+        <strong>特典券5枚：ハイタッチ＋1特典</strong>
+        <div class="desc">囲みチェキ／フリーデジタルショット／A3ポスターサインから1つ</div>
+        <div class="row"><span>希望数</span><input id="q5" type="number" min="0" value="0"></div>
+      </div>
+      <div class="item">
+        <strong>特典券10枚：B2ポスター</strong>
+        <div class="desc">指定メンバー1名サイン・コメント可</div>
+        <div class="row"><span>希望数</span><input id="q10" type="number" min="0" value="0"></div>
+      </div>
+    </div>
+    <button class="calc" onclick="calculate()">必要なCD枚数を計算</button>
+    <button class="reset" onclick="resetForm()">リセット</button>
+  </div>
+
+  <div id="result" class="card result">
+    <h2>計算結果</h2>
+    <div class="summary">
+      <div class="metric"><div>初回限定盤</div><div class="num" id="initial"></div></div>
+      <div class="metric"><div>通常盤</div><div class="num" id="regular"></div></div>
+      <div class="metric"><div>総CD枚数</div><div class="num" id="total"></div></div>
+      <div class="metric"><div>合計金額</div><div class="num price" id="cost"></div></div>
+    </div>
+    <p id="ticketLine"></p>
+    <p id="reason" class="small"></p>
+
+    <h2 style="margin-top:22px;">希望特典と必要特典券</h2>
+    <table>
+      <thead><tr><th>特典</th><th>希望数</th><th>必要特典券</th></tr></thead>
+      <tbody id="detail"></tbody>
+    </table>
+
+    <h2 style="margin-top:22px;">購入内訳</h2>
+    <table>
+      <tbody>
+        <tr><th>初回限定盤</th><td id="initialDetail"></td></tr>
+        <tr><th>通常盤</th><td id="regularDetail"></td></tr>
+        <tr><th>CD購入による特典券</th><td id="baseTickets"></td></tr>
+        <tr><th>累計購入特典</th><td id="bonusTickets"></td></tr>
+        <tr><th>合計特典券</th><td id="allTickets"></td></tr>
+        <tr><th>使用予定</th><td id="usedTickets"></td></tr>
+        <tr><th>余剰特典券</th><td id="surplus"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>注意</h2>
+    <div class="small">
+      この計算は、添付画像のレギュレーションを基にしています。公式ページでは、対象商品は初回限定盤4,400円・通常盤2,200円、CD1枚につき特典券1枚、1会計10,000円ごとに特典券2枚追加と案内されています。
+      <br><br>
+      「初回盤アートピース」は初回限定盤の特典なので、希望数と同数の初回限定盤を購入する前提です。実際の在庫・配布条件・当日のレギュレーション変更などは会場スタッフおよび公式案内をご確認ください。
+    </div>
+  </div>
+</div>
+
+<script>
+const benefits = [
+  {id:'q1', tickets:1, name:'特典券1枚：1枚特典'},
+  {id:'q2', tickets:2, name:'特典券2枚：初回盤アートピース'},
+  {id:'q3', tickets:3, name:'特典券3枚：メンバーソロムービー15秒'},
+  {id:'q5', tickets:5, name:'特典券5枚：ハイタッチ＋1特典'},
+  {id:'q10', tickets:10, name:'特典券10枚：B2ポスター'}
+];
+
+function yen(n){ return n.toLocaleString('ja-JP') + '円'; }
+
+function calculate(){
+  const q = {};
+  benefits.forEach(b => q[b.id] = Math.max(0, parseInt(document.getElementById(b.id).value || 0, 10)));
+  const required = benefits.reduce((s,b)=>s + q[b.id]*b.tickets, 0);
+  const art = q.q2;
+
+  if(required === 0){
+    document.getElementById('result').style.display='block';
+    document.getElementById('ticketLine').innerHTML='<span class="warn">希望特典を1つ以上入力してください。</span>';
+    ['initial','regular','total','cost','reason','detail','initialDetail','regularDetail','baseTickets','bonusTickets','allTickets','usedTickets','surplus']
+      .forEach(id=>{ if(document.getElementById(id)) document.getElementById(id).textContent=''; });
+    return;
+  }
+
+  // 探索範囲内で「希望特典を満たす最安購入」を探索。
+  // 初回盤はアートピース希望数以上。残りは通常盤を基本とする。
+  let best = null;
+  const maxCD = required + 30;
+  for(let initial=art; initial<=maxCD; initial++){
+    for(let regular=0; regular<=maxCD-initial; regular++){
+      const total=initial+regular;
+      if(total===0) continue;
+      const cost=initial*4400+regular*2200;
+      const bonus=Math.floor(cost/10000)*2;
+      const tickets=total+bonus;
+      if(tickets < required) continue;
+
+      const candidate={initial,regular,total,cost,bonus,tickets};
+      if(!best ||
+         candidate.cost < best.cost ||
+         (candidate.cost===best.cost && candidate.total < best.total) ||
+         (candidate.cost===best.cost && candidate.total===best.total && candidate.initial < best.initial)){
+        best=candidate;
+      }
+    }
+  }
+
+  const used=required, surplus=best.tickets-used;
+  document.getElementById('result').style.display='block';
+  document.getElementById('initial').textContent=best.initial+'枚';
+  document.getElementById('regular').textContent=best.regular+'枚';
+  document.getElementById('total').textContent=best.total+'枚';
+  document.getElementById('cost').textContent=yen(best.cost);
+  document.getElementById('ticketLine').innerHTML =
+    '<b>必要特典券：</b>'+required+'枚　→　<b>取得可能：</b>'+best.tickets+'枚　（余剰 '+surplus+'枚）';
+  document.getElementById('reason').textContent =
+    '同一会計での累計購入特典を最大限利用しつつ、希望特典を満たす組み合わせのうち、合計金額が最小になる購入パターンを表示しています。';
+
+  document.getElementById('detail').innerHTML = benefits
+    .filter(b=>q[b.id]>0)
+    .map(b=>`<tr><td>${b.name}</td><td>${q[b.id]}個</td><td>${q[b.id]*b.tickets}枚</td></tr>`)
+    .join('');
+
+  document.getElementById('initialDetail').textContent=best.initial+'枚 × 4,400円 = '+yen(best.initial*4400);
+  document.getElementById('regularDetail').textContent=best.regular+'枚 × 2,200円 = '+yen(best.regular*2200);
+  document.getElementById('baseTickets').textContent=best.total+'枚';
+  document.getElementById('bonusTickets').textContent=Math.floor(best.cost/10000)+'回 × 2枚 = '+best.bonus+'枚';
+  document.getElementById('allTickets').textContent=best.tickets+'枚';
+  document.getElementById('usedTickets').textContent=used+'枚';
+  document.getElementById('surplus').textContent=surplus+'枚';
+}
+
+function resetForm(){
+  benefits.forEach(b=>document.getElementById(b.id).value=0);
+  document.getElementById('result').style.display='none';
+}
+</script>
+</body>
+</html>
